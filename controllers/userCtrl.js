@@ -86,7 +86,7 @@ function loginCheck() {
         }
         else {
             setMenuItems('user');
-            navigate('users/weather');
+            navigate('users/wheather');
         }
     }
     else{
@@ -115,7 +115,6 @@ function setMenuItems(param){
             userMenu.classList.remove('hide');
             break;
         }
-        case 'guest' :
         default : {
             baseMenu.classList.remove('hide');
             break;

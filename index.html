@@ -29,29 +29,29 @@
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
               <ul class="navbar-nav ms-auto" id="baseMenu">
                 <li class="nav-item">
-                  <a class="nav-link active" href="#" onclick="navigate('guest/home')">Home</a>
+                  <a class="nav-link active" href="#" onclick="navigate('guest/home')"><i class="bi bi-house"></i> Home</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="#" onclick="navigate('guest/weather')">Időjárás</a>
+                  <a class="nav-link" href="#" onclick="navigate('guest/wheather')"><i class="bi bi-cloud-sun"></i> Időjárás</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="#" onclick="navigate('guest/login')">Login</a>
+                  <a class="nav-link" href="#" onclick="navigate('guest/login')"><i class="bi bi-person"></i> Login</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="#" onclick="navigate('guest/register')">Regisztráció</a>
+                  <a class="nav-link" href="#" onclick="navigate('guest/register')"><i class="bi bi-person-add"></i> Regisztráció</a>
                 </li>
               </ul>
 
                 <!--user-->
                 <ul class="navbar-nav ms-auto hide" id="userMenu">
                   <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="navigate('users/weather')">Időjárás</a>
+                    <a class="nav-link" href="#" onclick="navigate('users/wheather')"><i class="bi bi-cloud-sun"></i> Időjárás</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="navigate('users/profile')">Profilom</a>
+                    <a class="nav-link" href="#" onclick="navigate('users/profile')"><i class="bi bi-person-fill"></i> Profilom</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="logout()">Kijelentkezés</a>
+                    <a class="nav-link" href="#" onclick="logout()"><i class="bi bi-door-open"></i> Kijelentkezés</a>
                   </li>
                 </ul>
 
@@ -84,11 +84,11 @@
 
     
     <!--controllers scripts-->
-    <script src="controllers/messageCtrl.js"></script>
-    <script src="controllers/weatherCtrl.js"></script>
+    <script src="controllers/wheatherCtrl.js"></script>
     <script src="controllers/userCtrl.js"></script>
     <script src="controllers/guestCtrl.js"></script>
     <script src="controllers/adminCtrl.js"></script>
+    <script src="controllers/message.js"></script>
     
     <!-- Fő scripts -->
     <script src="assets/js/bootstrap.min.js"></script>

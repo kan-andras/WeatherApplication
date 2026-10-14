@@ -1,0 +1,35 @@
+<h3>Időjárás-előrejelzés</h3>
+<hr>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <h3>Keresés:</h3>
+        <input type="text" id="guestWeatherSearch" class="form-control"
+               placeholder="Keresés helység vagy időjárás típusa szerint..."
+               oninput="filterGuestWeather()">
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Dátum</th>
+                <th>Helység</th>
+                <th class="text-end">Min (°C)</th>
+                <th class="text-end">Max (°C)</th>
+                <th class="text-end">Időjárás</th>
+            </tr>
+        </thead>
+        <tbody id="guestWeatherBody">
+            <tr>
+                <td colspan="5" class="text-center text-muted">Betöltés...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<p class="text-muted small">
+    A részletes adatok (csapadék, szél, páratartalom, légnyomás, UV-index) csak bejelentkezés után érhetők el.
+    <a href="#" onclick="navigate('guest/login')">Bejelentkezés</a>
+</p>

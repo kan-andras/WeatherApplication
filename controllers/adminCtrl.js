@@ -2,7 +2,7 @@ async function getAllUsers(){
     //
     let luid = loadUser() ? loadUser().ID : 0;
     //
-    const response = await fetch('http://localhost:3000/admin/users', {
+    const response = await fetch('http://localhost:5000/admin/users', {
         method: 'POST',
         headers: {
             "Content-Type": "application/json"
@@ -69,7 +69,7 @@ function addTableRow(user, index){
 async function getStatistics() {
     let luid = loadUser() ? loadUser().ID : 0;
     //
-    const response = await fetch('http://localhost:3000/admin/statistics', {
+    const response = await fetch('http://localhost:5000/admin/statistics', {
         method: 'POST',
         headers: {
             "Content-Type": "application/json"
@@ -124,7 +124,7 @@ async function changeUserStatus(uid) {
         luid
     }
     //
-    const response = await fetch('http://localhost:3000/admin/statistics', {
+    const response = await fetch('http://localhost:5000/admin/statistics', {
         method: 'POST',
         headers: {
             "Content-Type": "application/json"
@@ -149,7 +149,7 @@ async function denyUser(tdToggle) {
  
     console.log("uid:", uid);
  
-    const response = await fetch('http://localhost:3000/admin/status', {
+    const response = await fetch('http://localhost:5000/admin/status', {
         method: 'POST',
         headers: {
             "Content-Type": "application/json"

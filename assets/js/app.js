@@ -28,13 +28,12 @@ async function navigate(page){
             break;
         }
         case 'users/wheather':{
-            getallUserWheather();
+            getallUserWeather();
             break;
         }
-        case 'guest/wheather':{
-            getallGuestWether();
+        case 'guest/wheather':
+            getallGuestWeather(); 
             break;
-        }
         case 'admin/wheather':{
             getallAdminWheather();
             break;
