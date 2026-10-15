@@ -154,8 +154,8 @@ async function updateProfile(){
 }
 
 async function updatePassword(){
-    let oldpass = document.querySelector('#oldpass');
-    let newpass = document.querySelector('#newpass');
+    let oldpass = document.querySelector('#oldpassword');
+    let newpass = document.querySelector('#newpassword');
     let confirm = document.querySelector('#confirm');
 
     let data = {

@@ -1,165 +1,99 @@
 async function getAllUsers(){
-    //
-    let luid = loadUser() ? loadUser().ID : 0;
-    //
-    const response = await fetch('http://localhost:5000/admin/users', {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json"
-        },
-        //
-        body: JSON.stringify({ luid })
-        //
-    });
-    if (response.status != 200){
+    const luid = loadUser() ? loadUser().ID : 0;
+    const usersList = document.querySelector('#usersList');
+
+    try {
+        const response = await fetch(`${API_URL}/admin/users`, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ luid })
+        });
         const res = await response.json();
-        showMessage('danger', 'ERROR', res.error)
-    }
-    else{
-        const users = await response.json();
-        // console.log(users);
-        drawtable(users);
-    }
-   
-}
- 
-function drawtable(users){
-    let usersCount = document.querySelector('#usersCount');
-    usersCount.innerHTML = users.length;
-    users.forEach((user, index) => {
-        addTableRow(user, index);
-    });
-}
-function addTableRow(user, index){
-    let usersList = document.querySelector('#usersList');
-    let tr = document.createElement('tr');
- 
-        let td1 = document.createElement('td');
-        let td2 = document.createElement('td');
-        let td3 = document.createElement('td');
-        let td4 = document.createElement('td');
-        let td5 = document.createElement('td');
-        let td6 = document.createElement('td');
-        let td7 = document.createElement('td');
- 
-        td1.innerHTML = (index + 1) + '.';
-        td2.innerHTML = user.name;
-        td3.innerHTML = user.email;
-        td4.innerHTML = moment(user.created_at).format('YYYY-MM-DD HH:mm:ss');
-        td5.innerHTML = user.last_login ? moment(user.last_login, 'YYYYMMDD').fromNow() : 'never';
-        td6.innerHTML = user.login_count;
-        let isActive = user.is_active ? 'checked' : '';
-        let isDisabled = user.ID == loadUser().ID ? 'disabled' : '';
 
-        td7.innerHTML = '<div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="is_active" '+ isActive + ' ' + isDisabled +' onclick="changeUserStatus('+ user.id +')"></div>';
- 
-        tr.appendChild(td1);
-        tr.appendChild(td2);
-        tr.appendChild(td3);
-        tr.appendChild(td4);
-        tr.appendChild(td5);
-        tr.appendChild(td6);
-        tr.appendChild(td7);
- 
-        td7.classList.add('text-end');
- 
-        usersList.appendChild(tr);
-}
+        if (response.status != 200){
+            showMessage('danger', 'ERROR', res.error);
+            usersList.innerHTML = '<tr><td colspan="8" class="text-center text-danger">A felhasználók nem tölthetők be.</td></tr>';
+            return;
+        }
 
-async function getStatistics() {
-    let luid = loadUser() ? loadUser().ID : 0;
-    //
-    const response = await fetch('http://localhost:5000/admin/statistics', {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json"
-        },
-        //
-        body: JSON.stringify({ luid })
-        //
-    });
-    if (response.status != 200){
-        const res = await response.json();
-        showMessage('danger', 'ERROR', res.error)
-    }
-    else{
-        const data = await response.json();
-        // console.log(users);
-        drawDashboard(data);
+        drawUsersTable(res);
+    } catch (err) {
+        console.error(err);
+        showMessage('danger', 'ERROR', 'A szerver nem érhető el.');
+        usersList.innerHTML = '<tr><td colspan="8" class="text-center text-danger">A szerver nem érhető el.</td></tr>';
     }
 }
 
-function drawDashboard(results){
-    let totalstep = document.querySelector('#totalSteps');
-    let totalKm = document.querySelector('#totalKm');
-    let avgStep = document.querySelector('#avgSteps');
-    let avgkm = document.querySelector('#avgKm');
-    console.log(results[0][0].total)
-    totalstep.innerHTML = results[0][0].total + ' steps';
-    totalKm.innerHTML = '~' + Math.round((results[0][0].total * 0.7) / 1000) + ' km';
-    avgStep.innerHTML = results[0][0].avg + ' steps'
-    avgkm.innerHTML = '~' + Math.round((results[0][0].avg * 0.7) / 1000) + ' km';
+// A teljes tbody-t újraírása, így frissítéskor nem duplázódnak a sorok. Megváltoztattam.
+function drawUsersTable(users){
+    const me = loadUser();
+    document.querySelector('#usersCount').textContent = users.length;
+    document.querySelector('#usersList').innerHTML = users
+        .map((user, index) => buildUserRow(user, index, me))
+        .join('');
+}
 
-    let topUsers = document.querySelector('#topUsers');
+function buildUserRow(user, index, me){
+    // a login csak status == 0 esetén tiltja a belépést
+    const isActive = user.status != 0;
+    const isMe = me && user.ID == me.ID;
 
-    results[1].forEach((user, index) =>{
-        let km = Math.round((user.steps * 0.7) / 1000) + ' km';
-        topUsers.innerHTML += `
-        <tr>
-        <td>${index+1}.</td>
-        <td class="text-start">
-        ${user.name} <br> <small>${user.email}</small>
+    // Piros vagy kék szín a usernek és adminnak.
+    const roleBadge = user.role == 'admin' ? 'text-bg-danger' : 'text-bg-primary';
+    const regDate = user.reg ? moment(user.reg).format('YYYY.MM.DD. HH:mm') : '-';
+    const lastLogin = user.last ? moment(user.last).format('YYYY.MM.DD. HH:mm') : 'Még nem lépett be';
+    // Táblázat kirajzolása.
+    return `
+    <tr class="fade-up">
+        <td class="d-none d-md-table-cell">${index + 1}.</td>
+        <td>
+            <div class="fw-semibold">${escapeHtml(user.name)}</div>
+            <div class="small text-body-secondary d-md-none">${escapeHtml(user.email)}</div>
         </td>
-        <td class="text-end>${user.steps} <br> <small>${km}</small></td>
-        </tr>`
-    })
-
+        <td class="d-none d-md-table-cell">${escapeHtml(user.email)}</td>
+        <td><span class="badge ${roleBadge}">${escapeHtml(user.role)}</span></td>
+        <td class="d-none d-lg-table-cell">${regDate}</td>
+        <td class="d-none d-md-table-cell">${lastLogin}</td>
+        <td class="d-none d-lg-table-cell">${user.loginCount ?? 0}</td>
+        <td class="text-end text-nowrap">
+            <span class="badge ${isActive ? 'text-bg-success' : 'text-bg-warning'} me-2">${isActive ? 'Aktív' : 'Tiltott'}</span>
+            <div class="form-check form-switch d-inline-block align-middle mb-0">
+                <input class="form-check-input" type="checkbox" role="switch"
+                    ${isActive ? 'checked' : ''}
+                    ${isMe ? 'disabled title="A saját fiókodat nem tilthatod le"' : ''}
+                    onchange="changeUserStatus(${Number(user.ID)})">
+            </div>
+        </td>
+    </tr>`;
 }
 
+// Tiltás / feloldás
 async function changeUserStatus(uid) {
-    let luid = loadUser() ? loadUser().id : 0;
+    const me = loadUser();
+    const luid = me ? me.ID : 0;
 
-    let data ={
-        uid,
-        luid
-    }
-    //
-    const response = await fetch('http://localhost:5000/admin/statistics', {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json"
-        },
-        //
-        body: JSON.stringify({ data })
-        //
-    });
-    const res = await response.json();
-    if (response.status != 200){
-        showMessage('danger', 'ERROR', res.error)
-    }
-    else{
-        drawDashboard(data);
-    }
-    
-}
+    try {
+        const response = await fetch(`${API_URL}/admin/status`, {
+            method: 'PATCH',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ uid, luid })
+        });
+        const res = await response.json();
 
-async function denyUser(tdToggle) {
-    let luid = loadUser ? loadUser().ID : 0;
-    let uid = tdToggle.dataset.uid;   // selected row's user ID
- 
-    console.log("uid:", uid);
- 
-    const response = await fetch('http://localhost:5000/admin/status', {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ uid, luid })
-    });
-    let res =await response.json()
-    if(response.status !=200){
-        showMessage('danger', 'ERROR', res.error );
-    } else{
-        showMessage('success', 'OK', res.message)
+        if (response.status != 200){
+            showMessage('danger', 'ERROR', res.error);
+        } else {
+            showMessage('success', 'OK', res.message);
+        }
+    } catch (err) {
+        console.error(err);
+        showMessage('danger', 'ERROR', 'A szerver nem érhető el.');
     }
+
+    // mindkét esetben újra kell tölteni a listát.
+    getAllUsers();
 }

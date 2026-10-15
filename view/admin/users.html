@@ -1,0 +1,32 @@
+<h3>Felhasználók szerkesztése</h3>
+<hr>
+
+<!-- A table-responsive miatt kis kijelzőn nem lóg ki az oldalból, hanem a táblázat görgethető -->
+<div class="table-responsive">
+    <table class="table table-hover table-striped align-middle">
+        <thead>
+            <tr>
+                <th class="d-none d-md-table-cell">#</th>
+                <th>Név</th>
+                <th class="d-none d-md-table-cell">E-mail</th>
+                <th>Szerepkör</th>
+                <th class="d-none d-lg-table-cell">Regisztráció</th>
+                <th class="d-none d-md-table-cell">Utolsó belépés</th>
+                <th class="d-none d-lg-table-cell">Belépések</th>
+                <th class="text-end">Állapot</th>
+            </tr>
+        </thead>
+        <tbody id="usersList">
+            <tr>
+                <td colspan="8" class="text-center text-body-secondary">Betöltés...</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="8" class="text-center">
+                    Összesen: <strong id="usersCount">0</strong> felhasználó(k)
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

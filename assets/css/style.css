@@ -1,7 +1,7 @@
 header{
     text-align: center;
     padding: 20px;
-    background-color: var(--bs-secondary);
+    background-color: rgba(128, 128, 128, 0.449);
 }
 footer{
     text-align: center;
