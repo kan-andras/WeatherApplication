@@ -156,15 +156,15 @@ async function showUserWeatherDetail(id) {
 
         // Iconok és adatok megjelenítése együtt.
         const tiles = [
-            ['bi-thermometer-low',  'Minimum hőmérséklet',      `${d.temp_min} °C`],
-            ['bi-thermometer-high', 'Maximum hőmérséklet',      `${d.temp_max} °C`],
-            ['bi-cloud-drizzle',    'Csapadék',                 `${d.precipitation ?? '-'} mm`],
-            ['bi-droplet-half',     'Csapadék valószínűsége',   `${d.precipitation_probability ?? '-'} %`],
-            ['bi-wind',             'Szélsebesség',             `${d.wind_speed ?? '-'} km/h`],
-            ['bi-compass',          'Szélirány',                d.wind_direction || '-'],
-            ['bi-moisture',         'Páratartalom',             `${d.humidity ?? '-'} %`],
-            ['bi-speedometer2',     'Légnyomás',                `${d.pressure ?? '-'} hPa`],
-            ['bi-sun',              'UV-index',                 d.uv_index ?? '-']
+            ['bi-thermometer-low','Minimum hőmérséklet',`${d.temp_min} °C`],
+            ['bi-thermometer-high','Maximum hőmérséklet',`${d.temp_max} °C`],
+            ['bi-cloud-drizzle','Csapadék',`${d.precipitation ?? '-'} mm`],
+            ['bi-droplet-half','Csapadék valószínűsége',`${d.precipitation_probability ?? '-'} %`],
+            ['bi-wind','Szélsebesség',`${d.wind_speed ?? '-'} km/h`],
+            ['bi-compass','Szélirány',d.wind_direction || '-'],
+            ['bi-moisture','Páratartalom',`${d.humidity ?? '-'} %`],
+            ['bi-speedometer2','Légnyomás',`${d.pressure ?? '-'} hPa`],
+            ['bi-sun','UV-index',d.uv_index ?? '-']
         ];
 
         document.querySelector('#detailTitle').innerHTML =
@@ -195,4 +195,33 @@ async function showUserWeatherDetail(id) {
 
 function closeUserWeatherDetail() {
     document.querySelector('#userWeatherDetail').classList.add('d-none');
+}
+
+async function getAllAdminWeather(){
+    const admin = loadAdmin();
+    if (!admin) {
+        loginCheck();
+        return;
+    }
+
+    document.querySelector('#welcomeAdminName').textContent = admin.name;
+
+    const list = document.querySelector('#adminWeatherList');
+
+    try {
+        const response = await fetch(`${API_URL}/weather`);
+        const res = await response.json();
+
+        if (response.status != 200) {
+            showMessage('danger', 'ERROR', res.error);
+            list.innerHTML = '<div class="col-12 text-center text-danger">Az adatok nem tölthetők be.</div>';
+            return;
+        }
+
+        renderAdminWeather(res);
+    } catch (err) {
+        console.error(err);
+        showMessage('danger', 'ERROR', 'A szerver nem érhető el.');
+        list.innerHTML = '<div class="col-12 text-center text-danger">A szerver nem érhető el.</div>';
+    }
 }

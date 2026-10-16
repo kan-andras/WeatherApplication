@@ -2,7 +2,6 @@ let contentbox = document.getElementById('content')
 
 let lightModeBtn = document.querySelector('#lightModeBtn');
 let darkModeBtn = document.querySelector('#darkModeBtn');
-
 let theme = 'light';
 
 
