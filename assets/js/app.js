@@ -23,23 +23,20 @@ async function navigate(page){
             getUserData();
             break;
         }
-        case 'admin/wheather':{
-            getAllAdminWeather();
-            break;
-        }
         case 'admin/dashboard':{
-            getAllAdminWeathercontrol();
+            getStatistics()
             break;
         }
         case 'users/wheather':{
             getallUserWeather();
             break;
         }
-        case 'guest/wheather':
+        case 'guest/wheather': {
             getallGuestWeather(); 
             break;
-        case 'admin/wheather':{
-            getallAdminWheather();
+        }
+        case 'admin/weather':{
+            getallAdminWeather();
             break;
         }
         default:

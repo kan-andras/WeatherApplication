@@ -1,0 +1,168 @@
+<style>
+    .fade-up {
+        --rise: 16px;
+        animation: fadeUp 0.6s ease-out backwards;
+        animation-delay: var(--delay, 0s);
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(var(--rise)); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .chart-grid { stroke: var(--bs-border-color); stroke-width: 1; }
+    .chart-text { fill: var(--bs-secondary-color); font-size: 11px; }
+    .chart-value { fill: var(--bs-body-color); font-weight: 600; }
+    .chart-bar {
+        fill: var(--bs-primary);
+        transform-box: fill-box;
+        transform-origin: 50% 100%;
+        animation: growBar 0.6s ease-out backwards;
+        animation-delay: var(--delay, 0s);
+    }
+    .chart-bar:hover { opacity: 0.75; }
+
+    @keyframes growBar {
+        from { transform: scaleY(0); }
+        to   { transform: scaleY(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .fade-up, .chart-bar { animation: none; }
+    }
+</style>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <h3 class="mb-0 fade-up">Időjárás kezelése</h3>
+    <button type="button" class="btn btn-primary fade-up" onclick="navigate('admin/dashboard')">
+        <i class="bi bi-plus-lg me-1"></i>Új előrejelzés
+    </button>
+</div>
+<hr>
+
+<!-- Üdvözlő kártya, mint a sima usernél-->
+<div class="card shadow-sm mx-auto mb-4 text-center fade-up" style="max-width: 520px; --delay: 0.1s;">
+    <div class="card-body py-3">
+        <i class="bi bi-person-gear fs-1"></i>
+        <h5 class="mt-1 mb-1">Üdvözlünk, <span id="adminWelcomeName"></span>!</h5>
+        <p class="text-body-secondary mb-0">Itt tekintheted meg, módosíthatod és törölheted az előrejelzéseket.</p>
+    </div>
+</div>
+
+<!-- Diagram cumó -->
+<div class="card shadow-sm mb-4 fade-up" style="--delay: 0.18s">
+    <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+            <h5 class="mb-0"><i class="bi bi-bar-chart-line-fill me-2"></i>Diagram</h5>
+            <div class="d-flex flex-wrap gap-2">
+                <select id="chartLocation" class="form-select form-select-sm" aria-label="Helység" onchange="updateAdminChart()"></select>
+                <select id="chartMetric" class="form-select form-select-sm" aria-label="Mutató" onchange="updateAdminChart()">
+                    <option value="precipitation">Csapadék (mm)</option>
+                    <option value="precipitation_probability">Csapadék valószínűsége (%)</option>
+                    <option value="wind_speed">Szélsebesség (km/h)</option>
+                </select>
+            </div>
+        </div>
+        <p class="text-body-secondary small mb-2" id="chartCaption"></p>
+        <div id="adminChart"></div>
+    </div>
+</div>
+
+<!-- Szerkesztő panel ami nem akart müködni... -->
+<div class="card shadow-sm mb-4 d-none" id="adminWeatherEdit">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <h5 class="mb-0" id="adminEditTitle">Előrejelzés szerkesztése</h5>
+            <button type="button" class="btn-close" aria-label="Bezár" onclick="closeAdminEdit()"></button>
+        </div>
+        <form id="editWeatherForm" onsubmit="saveAdminWeather(event)">
+            <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label" for="ed-date">Dátum</label>
+                <input type="date" class="form-control" id="ed-date" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="ed-location">Helység</label>
+                <input type="text" class="form-control" id="ed-location" maxlength="100" placeholder="pl. Baja" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="ed-weather_type">Időjárás típusa</label>
+                <input type="text" class="form-control" id="ed-weather_type" list="weatherTypes" maxlength="50" placeholder="pl. Napos" required>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label class="form-label" for="ed-temp_min">Minimum hőmérséklet</label>
+                <div class="input-group"><input type="number" class="form-control" id="ed-temp_min" step="0.1" min="-60" max="60" required><span class="input-group-text">°C</span></div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label class="form-label" for="ed-temp_max">Maximum hőmérséklet</label>
+                <div class="input-group"><input type="number" class="form-control" id="ed-temp_max" step="0.1" min="-60" max="60" required><span class="input-group-text">°C</span></div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label class="form-label" for="ed-precipitation">Csapadék mennyisége</label>
+                <div class="input-group"><input type="number" class="form-control" id="ed-precipitation" step="0.1" min="0" max="1000"><span class="input-group-text">mm</span></div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label class="form-label" for="ed-precipitation_probability">Csapadék valószínűsége</label>
+                <div class="input-group"><input type="number" class="form-control" id="ed-precipitation_probability" step="1" min="0" max="100"><span class="input-group-text">%</span></div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label class="form-label" for="ed-wind_speed">Szélsebesség</label>
+                <div class="input-group"><input type="number" class="form-control" id="ed-wind_speed" step="0.1" min="0" max="400"><span class="input-group-text">km/h</span></div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label class="form-label" for="ed-wind_direction">Szélirány</label>
+                <select class="form-select" id="ed-wind_direction"><option value="">–</option><option value="É">É</option><option value="ÉK">ÉK</option><option value="K">K</option><option value="DK">DK</option><option value="D">D</option><option value="DNy">DNy</option><option value="Ny">Ny</option><option value="ÉNy">ÉNy</option></select>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label class="form-label" for="ed-humidity">Páratartalom</label>
+                <div class="input-group"><input type="number" class="form-control" id="ed-humidity" step="1" min="0" max="100"><span class="input-group-text">%</span></div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label class="form-label" for="ed-pressure">Légnyomás</label>
+                <div class="input-group"><input type="number" class="form-control" id="ed-pressure" step="1" min="0" max="1100"><span class="input-group-text">hPa</span></div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label class="form-label" for="ed-uv_index">UV-index</label>
+                <input type="number" class="form-control" id="ed-uv_index" step="1" min="0" max="15">
+            </div>
+            <datalist id="weatherTypes"><option value="Napos"><option value="Derült"><option value="Részben felhős"><option value="Felhős"><option value="Esős"><option value="Zivatar"><option value="Hóesés"><option value="Ködös"></datalist>
+            </div>
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Mentés</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="closeAdminEdit()">Mégse</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!--Az összes előrejelzés táblázat -->
+<div class="table-responsive">
+    <table class="table table-hover table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Dátum</th>
+                <th>Helység</th>
+                <th>Időjárás</th>
+                <th class="d-none d-md-table-cell">Hőmérséklet</th>
+                <th class="d-none d-lg-table-cell">Csapadék</th>
+                <th class="d-none d-lg-table-cell">Szél</th>
+                <th class="d-none d-xl-table-cell">Páratartalom</th>
+                <th class="d-none d-xl-table-cell">Légnyomás</th>
+                <th class="d-none d-xl-table-cell">UV</th>
+                <th class="text-end">Műveletek</th>
+            </tr>
+        </thead>
+        <tbody id="adminWeatherBody">
+            <tr>
+                <td colspan="10" class="text-center text-body-secondary">Betöltés...</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="10" class="text-center">
+                    Összesen: <strong id="adminWeatherCount">0</strong> előrejelzés
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
