@@ -1,3 +1,4 @@
+// Userek lekérése az admin felületre.
 async function getAllUsers(){
     const luid = loadUser() ? loadUser().ID : 0;
     const usersList = document.querySelector('#usersList');
@@ -26,7 +27,7 @@ async function getAllUsers(){
     }
 }
 
-// A teljes tbody-t újraírása, így frissítéskor nem duplázódnak a sorok. Megváltoztattam.
+// Táblázat rajzolás
 function drawUsersTable(users){
     const me = loadUser();
     document.querySelector('#usersCount').textContent = users.length;
@@ -35,110 +36,12 @@ function drawUsersTable(users){
         .join('');
 }
 
-function buildUserRow(user, index, me){
-    // a login csak status == 0 esetén tiltja a belépést
-    const isActive = user.status != 0;
-    const isMe = me && user.ID == me.ID;
-
-    // Piros vagy kék szín a usernek és adminnak.
-    const roleBadge = user.role == 'admin' ? 'text-bg-danger' : 'text-bg-primary';
-    const regDate = user.reg ? moment(user.reg).format('YYYY.MM.DD. HH:mm') : '-';
-    const lastLogin = user.last ? moment(user.last).format('YYYY.MM.DD. HH:mm') : 'Még nem lépett be';
-    // Táblázat kirajzolása.
-    return `
-    <tr class="fade-up">
-        <td class="d-none d-md-table-cell">${index + 1}.</td>
-        <td>
-            <div class="fw-semibold">${escapeHtml(user.name)}</div>
-            <div class="small text-body-secondary d-md-none">${escapeHtml(user.email)}</div>
-        </td>
-        <td class="d-none d-md-table-cell">${escapeHtml(user.email)}</td>
-        <td><span class="badge ${roleBadge}">${escapeHtml(user.role)}</span></td>
-        <td class="d-none d-lg-table-cell">${regDate}</td>
-        <td class="d-none d-md-table-cell">${lastLogin}</td>
-        <td class="d-none d-lg-table-cell">${user.loginCount ?? 0}</td>
-        <td class="text-end text-nowrap">
-            <span class="badge ${isActive ? 'text-bg-success' : 'text-bg-warning'} me-2">${isActive ? 'Aktív' : 'Tiltott'}</span>
-            <div class="form-check form-switch d-inline-block align-middle mb-0">
-                <input class="form-check-input" type="checkbox" role="switch"
-                    ${isActive ? 'checked' : ''}
-                    ${isMe ? 'disabled title="A saját fiókodat nem tilthatod le"' : ''}
-                    onchange="changeUserStatus(${Number(user.ID)})">
-            </div>
-        </td>
-    </tr>`;
-}
-
-// Tiltás / feloldás
-async function changeUserStatus(uid) {
-    const me = loadUser();
-    const luid = me ? me.ID : 0;
-
-    try {
-        const response = await fetch(`${API_URL}/admin/status`, {
-            method: 'PATCH',
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ uid, luid })
-        });
-        const res = await response.json();
-
-        if (response.status != 200){
-            showMessage('danger', 'ERROR', res.error);
-        } else {
-            showMessage('success', 'OK', res.message);
-        }
-    } catch (err) {
-        console.error(err);
-        showMessage('danger', 'ERROR', 'A szerver nem érhető el.');
-    }
-
-    // mindkét esetben újra kell tölteni a listát.
-    getAllUsers();
-}
-
-async function getAllUsers(){
-    const luid = loadUser() ? loadUser().ID : 0;
-    const usersList = document.querySelector('#usersList');
-
-    try {
-        const response = await fetch(`${API_URL}/admin/users`, {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ luid })
-        });
-        const res = await response.json();
-
-        if (response.status != 200){
-            showMessage('danger', 'ERROR', res.error);
-            usersList.innerHTML = '<tr><td colspan="8" class="text-center text-danger">A felhasználók nem tölthetők be.</td></tr>';
-            return;
-        }
-
-        drawUsersTable(res);
-    } catch (err) {
-        console.error(err);
-        showMessage('danger', 'ERROR', 'A szerver nem érhető el.');
-        usersList.innerHTML = '<tr><td colspan="8" class="text-center text-danger">A szerver nem érhető el.</td></tr>';
-    }
-}
-
-function drawUsersTable(users){
-    const me = loadUser();
-    document.querySelector('#usersCount').textContent = users.length;
-    document.querySelector('#usersList').innerHTML = users
-        .map((user, index) => buildUserRow(user, index, me))
-        .join('');
-}
-
-
+// Users táblázatnak a kirajzolása.
 function buildUserRow(user, index, me){
     const isActive = user.status != 0;
     const isMe = me && user.ID == me.ID;
 
+    // Szerepkörök hátterének állítása.
     const roleBadge = user.role == 'admin' ? 'text-bg-danger' : 'text-bg-primary';
     const regDate = user.reg ? moment(user.reg).format('YYYY.MM.DD. HH:mm') : '-';
     const lastLogin = user.last ? moment(user.last).format('YYYY.MM.DD. HH:mm') : 'Még nem lépett be';
@@ -167,7 +70,7 @@ function buildUserRow(user, index, me){
     </tr>`;
 }
 
-// Tiltás / feloldás
+//Tiltás/feloldás
 async function changeUserStatus(uid) {
     const me = loadUser();
     const luid = me ? me.ID : 0;
@@ -195,12 +98,15 @@ async function changeUserStatus(uid) {
     getAllUsers();
 }
 
+//ADMIN: időjárás-előrejelzések
 
+//Az űrlapmezők azonosítója
 const WEATHER_FIELDS = ['date', 'location', 'weather_type', 'temp_min', 'temp_max', 'precipitation',
     'precipitation_probability', 'wind_speed', 'wind_direction', 'humidity', 'pressure', 'uv_index'];
 const WEATHER_NUMERIC_FIELDS = ['temp_min', 'temp_max', 'precipitation', 'precipitation_probability',
     'wind_speed', 'humidity', 'pressure', 'uv_index'];
 
+//A diagramon választható mutatók
 const CHART_METRICS = {
     precipitation: { label: 'Csapadék', unit: 'mm' },
     precipitation_probability: { label: 'Csapadék valószínűsége', unit: '%' },
@@ -209,8 +115,7 @@ const CHART_METRICS = {
 
 let adminWeatherData = [];
 let editingWeatherId = null;
-let chartResizeBound = false;
-let chartResizeTimer = null;
+let adminChart = null;
 
 async function adminRequest(path, method, payload = {}) {
     const me = loadUser();
@@ -230,6 +135,7 @@ async function adminRequest(path, method, payload = {}) {
     }
 }
 
+//Űrlap
 function readWeatherForm(prefix) {
     const data = {};
     WEATHER_FIELDS.forEach(field => {
@@ -247,14 +153,15 @@ function fillWeatherForm(prefix, item) {
     WEATHER_FIELDS.forEach(field => {
         let value = item[field];
         if (field == 'date') {
-            value = moment(value).format('YYYY-MM-DD');   // a date input ezt a formátumot várja
+            value = moment(value).format('YYYY-MM-DD');
         }
         document.querySelector(`#${prefix}-${field}`).value = value ?? '';
     });
 }
 
+//Dashboard
 
-// Összesítő kártyák a vezérlőpulton betöltésekor)
+//Összesítő kártyák a vezérlőpulton
 async function getStatistics() {
     const [weather, users] = await Promise.all([
         adminRequest('/admin/weather', 'POST'),
@@ -278,7 +185,7 @@ async function getStatistics() {
     document.querySelector('#statUsers').textContent = users.body.length;
 }
 
-// Új előrejelzés felvétele
+//új előrejelzés felvétele
 async function createWeather(event) {
     event.preventDefault();
     const form = event.target;
@@ -289,6 +196,8 @@ async function createWeather(event) {
     }
 
     const data = readWeatherForm('nw');
+
+    //Itt is tesztelünk, hogy már a frontenden se lehessen hibás adatot felvinni.
     if (data.temp_min > data.temp_max) {
         showMessage('warning', 'FIGYELEM', 'A minimum hőmérséklet nem lehet nagyobb a maximumnál!');
         return;
@@ -305,7 +214,7 @@ async function createWeather(event) {
     await getStatistics();
 }
 
-//Admin időjárás oldal 
+//admin időjárás oldal
 
 //Összes előrejelzés lekérése
 async function getallAdminWeather() {
@@ -327,7 +236,7 @@ async function getallAdminWeather() {
 
     adminWeatherData = res.body;
     renderAdminWeather();
-    setupAdminChart();
+    updateAdminChart();
 }
 
 function renderAdminWeather() {
@@ -341,7 +250,7 @@ function renderAdminWeather() {
     body.innerHTML = adminWeatherData.map(buildAdminWeatherRow).join('');
 }
 
-// Egy sor az admin táblázatban
+//Admin nézeti időjárás oldal.
 function buildAdminWeatherRow(item, i) {
     const withUnit = (value, unit) => (value === null || value === undefined) ? '-' : `${value} ${unit}`;
 
@@ -371,7 +280,7 @@ function buildAdminWeatherRow(item, i) {
     </tr>`;
 }
 
-//Szerkesztő panel megnyitása
+//Szerkesztő panel megjelenítése
 function editAdminWeather(id) {
     const item = adminWeatherData.find(w => w.ID == id);
     if (!item) return;
@@ -383,7 +292,7 @@ function editAdminWeather(id) {
 
     const panel = document.querySelector('#adminWeatherEdit');
     panel.classList.remove('d-none', 'fade-up');
-    void panel.offsetWidth; //Az animációhoz való finomság
+    void panel.offsetWidth; // animációnak az újraindítása.
     panel.classList.add('fade-up');
     panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -393,7 +302,7 @@ function closeAdminEdit() {
     document.querySelector('#adminWeatherEdit').classList.add('d-none');
 }
 
-//Módosítás mentése
+//Modosítás mentése
 async function saveAdminWeather(event) {
     event.preventDefault();
     if (editingWeatherId === null) return;
@@ -417,6 +326,7 @@ async function saveAdminWeather(event) {
 
 //Törlés
 async function deleteAdminWeather(id) {
+    //Confirm ablak a biztos törléshez.
     if (!confirm('Biztosan törölni szeretnéd ezt az előrejelzést?')) return;
 
     const res = await adminRequest(`/admin/weather/${id}`, 'DELETE');
@@ -430,109 +340,54 @@ async function deleteAdminWeather(id) {
     await getallAdminWeather();
 }
 
-// A helység-választó feltöltése és a diagram kirajzolása
-function setupAdminChart() {
-    const select = document.querySelector('#chartLocation');
-    const previous = select.value;
-
-    const locations = [...new Set(adminWeatherData.map(w => w.location))]
-        .sort((a, b) => a.localeCompare(b, 'hu'));
-    select.innerHTML = locations
-        .map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`)
-        .join('');
-    if (locations.includes(previous)) select.value = previous;
-
-    bindChartResize();
-    updateAdminChart();
-}
-
+// Chart view frissítése a kiválasztott érték alapján.
 function updateAdminChart() {
-    const container = document.querySelector('#adminChart');
-    if (!container) return;
+    const canvas = document.querySelector('#adminChartCanvas');
+    if (!canvas) return;
 
-    const location = document.querySelector('#chartLocation').value;
-    const key = document.querySelector('#chartMetric').value;
-    const metric = CHART_METRICS[key];
-
-    const rows = adminWeatherData
-        .filter(w => w.location === location)
-        .sort((a, b) => new Date(a.date) - new Date(b.date))
-        .slice(-14);
-
-    const points = rows.map(w => {
-        const value = Math.round((Number(w[key]) || 0) * 10) / 10;
-        return {
-            label: moment(w.date).format('MM.DD.'),
-            value,
-            tip: `${moment(w.date).format('YYYY.MM.DD.')} – ${w.location}: ${value} ${metric.unit}`
-        };
-    });
-
-    document.querySelector('#chartCaption').textContent = points.length > 0
-        ? `${metric.label} (${metric.unit}) – ${location}, utolsó ${points.length} bejegyzés`
-        : '';
-    drawBarChart(container, points);
-}
-
-function niceMax(value) {
-    if (value <= 0) return 1;
-    const power = Math.pow(10, Math.floor(Math.log10(value)));
-    const n = value / power;
-    const nice = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
-    return nice * power;
-}
-
-function drawBarChart(container, points) {
-    if (points.length == 0) {
-        container.innerHTML = '<p class="text-center text-body-secondary my-5">Nincs adat a diagramhoz.</p>';
+    if (typeof Chart === 'undefined') {
+        showMessage('danger', 'ERROR', 'A Chart.js nincs betöltve, nézd meg az index.html script sorát.');
         return;
     }
 
-    const W = Math.max(container.clientWidth, 300);
-    const H = 260;
-    const margin = { top: 24, right: 12, bottom: 34, left: 46 };
-    const innerW = W - margin.left - margin.right;
-    const innerH = H - margin.top - margin.bottom;
+    const key = document.querySelector('#chartMetric').value;
+    const metric = CHART_METRICS[key];
 
-    const max = niceMax(Math.max(...points.map(p => p.value)));
-    const band = innerW / points.length;
-    const barW = Math.min(band * 0.6, 44);
-    const y = v => margin.top + innerH - (v / max) * innerH;
-    const labelEvery = Math.ceil(points.length / Math.max(1, Math.floor(innerW / 46)));
+    const dayOf = w => moment(w.date).format('YYYY-MM-DD');
+    const labels = [...new Set(adminWeatherData.map(dayOf))].sort();
+    const locations = [...new Set(adminWeatherData.map(w => w.location))]
+        .sort((a, b) => a.localeCompare(b, 'hu'));
 
-    let svg = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Oszlopdiagram">`;
+    const datasets = locations.map(location => ({
+        label: location,
+        data: labels.map(day => {
+            const row = adminWeatherData.find(w => w.location === location && dayOf(w) === day);
+            return row ? (Number(row[key]) || 0) : null;
+        }),
+        borderWidth: 2,
+        pointStyle: 'circle',
+        pointRadius: 8,
+        pointHoverRadius: 12,
+        spanGaps: true
+    }));
 
-    for (let i = 0; i <= 4; i++) {
-        const v = (max * i) / 4;
-        svg += `<line class="chart-grid" x1="${margin.left}" x2="${W - margin.right}" y1="${y(v)}" y2="${y(v)}"/>`;
-        svg += `<text class="chart-text" x="${margin.left - 8}" y="${y(v) + 4}" text-anchor="end">${Math.round(v * 100) / 100}</text>`;
-    }
+    //Chart view alkalmazkodása a sötét és a világos módhoz.
+    Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--bs-body-color').trim() || '#666';
 
-    points.forEach((p, i) => {
-        const x = margin.left + band * i + (band - barW) / 2;
-        const h = (p.value / max) * innerH;
-
-        svg += `<rect class="chart-bar" x="${x}" y="${y(p.value)}" width="${barW}" height="${h}" rx="3" style="--delay: ${i * 0.05}s"><title>${escapeHtml(p.tip)}</title></rect>`;
-        if (band >= 34) {
-            svg += `<text class="chart-text chart-value" x="${x + barW / 2}" y="${y(p.value) - 6}" text-anchor="middle">${p.value}</text>`;
+    if (adminChart) adminChart.destroy();
+    adminChart = new Chart(canvas, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: metric.unit }
+                }
+            },
+            plugins: {
+                title: { display: true, text: metric.label }
+            }
         }
-        if (i % labelEvery == 0) {
-            svg += `<text class="chart-text" x="${x + barW / 2}" y="${H - 12}" text-anchor="middle">${escapeHtml(p.label)}</text>`;
-        }
-    });
-
-    svg += '</svg>';
-    container.innerHTML = svg;
-}
-
-function bindChartResize() {
-    if (chartResizeBound) return;
-    chartResizeBound = true;
-
-    window.addEventListener('resize', () => {
-        clearTimeout(chartResizeTimer);
-        chartResizeTimer = setTimeout(() => {
-            if (document.querySelector('#adminChart')) updateAdminChart();
-        }, 200);
     });
 }

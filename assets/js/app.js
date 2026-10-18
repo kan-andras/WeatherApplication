@@ -55,6 +55,7 @@ function setTheme(theme){
  document.documentElement.setAttribute('data-bs-theme', theme);
  saveTheme(theme);
  setThemeBtnState();
+ if (typeof updateAdminChart === 'function') updateAdminChart(); 
 }
 function saveTheme(theme){
  localStorage.setItem('SCT', theme);

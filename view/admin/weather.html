@@ -1,36 +1,4 @@
-<style>
-    .fade-up {
-        --rise: 16px;
-        animation: fadeUp 0.6s ease-out backwards;
-        animation-delay: var(--delay, 0s);
-    }
-
-    @keyframes fadeUp {
-        from { opacity: 0; transform: translateY(var(--rise)); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .chart-grid { stroke: var(--bs-border-color); stroke-width: 1; }
-    .chart-text { fill: var(--bs-secondary-color); font-size: 11px; }
-    .chart-value { fill: var(--bs-body-color); font-weight: 600; }
-    .chart-bar {
-        fill: var(--bs-primary);
-        transform-box: fill-box;
-        transform-origin: 50% 100%;
-        animation: growBar 0.6s ease-out backwards;
-        animation-delay: var(--delay, 0s);
-    }
-    .chart-bar:hover { opacity: 0.75; }
-
-    @keyframes growBar {
-        from { transform: scaleY(0); }
-        to   { transform: scaleY(1); }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .fade-up, .chart-bar { animation: none; }
-    }
-</style>
+<link rel="stylesheet" href="/assets/css/style.css">
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
     <h3 class="mb-0 fade-up">Időjárás kezelése</h3>
@@ -40,7 +8,6 @@
 </div>
 <hr>
 
-<!-- Üdvözlő kártya, mint a sima usernél-->
 <div class="card shadow-sm mx-auto mb-4 text-center fade-up" style="max-width: 520px; --delay: 0.1s;">
     <div class="card-body py-3">
         <i class="bi bi-person-gear fs-1"></i>
@@ -49,26 +16,7 @@
     </div>
 </div>
 
-<!-- Diagram cumó -->
-<div class="card shadow-sm mb-4 fade-up" style="--delay: 0.18s">
-    <div class="card-body">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-            <h5 class="mb-0"><i class="bi bi-bar-chart-line-fill me-2"></i>Diagram</h5>
-            <div class="d-flex flex-wrap gap-2">
-                <select id="chartLocation" class="form-select form-select-sm" aria-label="Helység" onchange="updateAdminChart()"></select>
-                <select id="chartMetric" class="form-select form-select-sm" aria-label="Mutató" onchange="updateAdminChart()">
-                    <option value="precipitation">Csapadék (mm)</option>
-                    <option value="precipitation_probability">Csapadék valószínűsége (%)</option>
-                    <option value="wind_speed">Szélsebesség (km/h)</option>
-                </select>
-            </div>
-        </div>
-        <p class="text-body-secondary small mb-2" id="chartCaption"></p>
-        <div id="adminChart"></div>
-    </div>
-</div>
-
-<!-- Szerkesztő panel ami nem akart müködni... -->
+<!--Szerkesztő panel-->
 <div class="card shadow-sm mb-4 d-none" id="adminWeatherEdit">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-start mb-3">
@@ -135,34 +83,61 @@
     </div>
 </div>
 
-<!--Az összes előrejelzés táblázat -->
-<div class="table-responsive">
-    <table class="table table-hover table-striped align-middle">
-        <thead>
-            <tr>
-                <th>Dátum</th>
-                <th>Helység</th>
-                <th>Időjárás</th>
-                <th class="d-none d-md-table-cell">Hőmérséklet</th>
-                <th class="d-none d-lg-table-cell">Csapadék</th>
-                <th class="d-none d-lg-table-cell">Szél</th>
-                <th class="d-none d-xl-table-cell">Páratartalom</th>
-                <th class="d-none d-xl-table-cell">Légnyomás</th>
-                <th class="d-none d-xl-table-cell">UV</th>
-                <th class="text-end">Műveletek</th>
-            </tr>
-        </thead>
-        <tbody id="adminWeatherBody">
-            <tr>
-                <td colspan="10" class="text-center text-body-secondary">Betöltés...</td>
-            </tr>
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="10" class="text-center">
-                    Összesen: <strong id="adminWeatherCount">0</strong> előrejelzés
-                </td>
-            </tr>
-        </tfoot>
-    </table>
+<ul class="nav nav-tabs mb-3 fade-up" style="--delay: 0.18s" id="adminWeatherTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="aw-table-tab" data-bs-toggle="tab" data-bs-target="#aw-table-pane" type="button" role="tab" aria-controls="aw-table-pane" aria-selected="true"><i class="bi bi-table me-1"></i>Table view</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="aw-chart-tab" data-bs-toggle="tab" data-bs-target="#aw-chart-pane" type="button" role="tab" aria-controls="aw-chart-pane" aria-selected="false"><i class="bi bi-graph-up me-1"></i>Chart view</button>
+    </li>
+</ul>
+
+<div class="tab-content">
+
+    <div class="tab-pane fade show active" id="aw-table-pane" role="tabpanel" aria-labelledby="aw-table-tab" tabindex="0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Dátum</th>
+                        <th>Helység</th>
+                        <th>Időjárás</th>
+                        <th class="d-none d-md-table-cell">Hőmérséklet</th>
+                        <th class="d-none d-lg-table-cell">Csapadék</th>
+                        <th class="d-none d-lg-table-cell">Szél</th>
+                        <th class="d-none d-xl-table-cell">Páratartalom</th>
+                        <th class="d-none d-xl-table-cell">Légnyomás</th>
+                        <th class="d-none d-xl-table-cell">UV</th>
+                        <th class="text-end">Műveletek</th>
+                    </tr>
+                </thead>
+                <tbody id="adminWeatherBody">
+                    <tr>
+                        <td colspan="10" class="text-center text-body-secondary">Betöltés...</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="10" class="text-center">
+                            Összesen: <strong id="adminWeatherCount">0</strong> előrejelzés
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!--Diagram (Chart.js)-->
+    <div class="tab-pane fade" id="aw-chart-pane" role="tabpanel" aria-labelledby="aw-chart-tab" tabindex="0">
+        <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+            <label for="chartMetric" class="form-label mb-0 text-body-secondary small">Mutató:</label>
+            <select id="chartMetric" class="form-select form-select-sm w-auto" onchange="updateAdminChart()">
+                <option value="precipitation">Csapadék (mm)</option>
+                <option value="precipitation_probability">Csapadék valószínűsége (%)</option>
+                <option value="wind_speed">Szélsebesség (km/h)</option>
+            </select>
+        </div>
+        <canvas id="adminChartCanvas"></canvas>
+    </div>
+
 </div>

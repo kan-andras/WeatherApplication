@@ -20,7 +20,7 @@
             <h3>2026</h3>
             
         </header>
-        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <nav class="navbar navbar-expand-lg bg-body-tertiary bg-secondary-subtle rounded shadow-sm mb-4">
           <div class="container-fluid">
             <a class="navbar-brand" href="#">WeatherAPP</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,16 +59,16 @@
                 
                 <ul class="navbar-nav ms-auto hide" id="adminMenu">
                   <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="navigate('admin/weather')">Időjárások</a>
+                    <a class="nav-link" href="#" onclick="navigate('admin/weather')"><i class="bi bi-cloud-sun"></i> Időjárások</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="navigate('admin/dashboard')">Dashboard</a>
+                    <a class="nav-link" href="#" onclick="navigate('admin/dashboard')"><i class="bi bi-bar-chart-fill"></i> Dashboard</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="navigate('admin/users')">Data change</a>
+                    <a class="nav-link" href="#" onclick="navigate('admin/users')"><i class="bi bi-clipboard-check-fill"></i> Data change</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="logout()">Kijelentkezés</a>
+                    <a class="nav-link" href="#" onclick="logout()"><i class="bi bi-door-open"></i> Kijelentkezés</a>
                   </li>
                 </ul>
                 
@@ -94,6 +94,7 @@
     <script src="controllers/message.js"></script>
     
     <!-- Fő scripts -->
+     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
     <script src="assets/js/moment.js"></script>
     <script src="assets/js/angular.js"></script>

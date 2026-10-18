@@ -1,4 +1,3 @@
-// Egy helyen állítható a backend címe (egyezzen a server.js portjával!)
 const API_URL = 'http://localhost:5000';
 
 async function registration(){
@@ -26,7 +25,7 @@ async function registration(){
         showMessage('danger', 'ERROR', res.error );
     } else{
         showMessage('success', 'OK', res.message)
-        navigate('guest/login')   // users/login helyett: a login oldal a guest mappában van
+        navigate('guest/login')
     }
 }
 
@@ -77,7 +76,7 @@ function clearUser() {
 }
 
 function loginCheck() {
-    let user = loadUser();   // let: ne jöjjön létre véletlen globális változó
+    let user = loadUser();
 
     if (user){
         if (user.role == 'admin'){
@@ -90,7 +89,6 @@ function loginCheck() {
         }
     }
     else{
-        // nincs belépve -> vendég: csak login, regisztráció, időjárás
         setMenuItems('guest');
         navigate('guest/home');
     }
@@ -101,7 +99,6 @@ function setMenuItems(param){
     let userMenu = document.querySelector('#userMenu');
     let adminMenu = document.querySelector('#adminMenu');
 
-    // először mindent elrejtünk, aztán csak a megfelelőt mutatjuk
     baseMenu.classList.add('hide');
     userMenu.classList.add('hide');
     adminMenu.classList.add('hide');
@@ -133,11 +130,11 @@ async function updateProfile(){
        luid: loggedUser.ID
    };
    const response = await fetch(`${API_URL}/users/${loggedUser.ID}`, {
-       method: 'PATCH',                 // a szerveren app.patch('/users/:uid')
+       method: 'PATCH',
        headers: {
            "Content-Type": "application/json"
        },
-       body: JSON.stringify(data)       // nem {data}, a szerver közvetlenül a body-ból olvassa
+       body: JSON.stringify(data)
    });
    let res = await response.json();
    if(response.status != 200){
@@ -164,8 +161,8 @@ async function updatePassword(){
         confirm: confirm.value
     }
 
-    let uid = loadUser() ? loadUser().ID : 0;   // .id helyett .ID
-    const response = await fetch(`${API_URL}/users/${uid}/password`, {   // passmod helyett password
+    let uid = loadUser() ? loadUser().ID : 0; 
+    const response = await fetch(`${API_URL}/users/${uid}/password`, {
         method:'POST',
         headers:{
             "Content-Type": "application/json"

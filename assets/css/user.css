@@ -1,0 +1,38 @@
+.fade-up {
+        --rise: 16px;
+        animation: fadeUp 0.6s ease-out backwards;
+        animation-delay: var(--delay, 0s);
+    }
+
+    @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(var(--rise));
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .weather-card {
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .weather-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .detail-tile {
+        border: 1px solid var(--bs-border-color);
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .fade-up {
+            animation: none;
+        }
+    }

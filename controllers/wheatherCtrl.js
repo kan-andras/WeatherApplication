@@ -111,6 +111,7 @@ function renderUserWeather(items) {
         return;
     }
 
+    // Animációs megjelenítés. (Math-es megoldás).
     list.innerHTML = items.map((item, i) => `
         <div class="col-sm-6 col-lg-4 fade-up" style="--delay: ${0.25 + Math.min(i, 10) * 0.07}s">
             <div class="card weather-card h-100 shadow-sm" onclick="showUserWeatherDetail(${Number(item.ID)})">
@@ -154,7 +155,7 @@ async function showUserWeatherDetail(id) {
             return;
         }
 
-        // Iconok és adatok megjelenítése együtt.
+        // Iconok és adatok megjelenítése együtt. Felugró panel, animációval.
         const tiles = [
             ['bi-thermometer-low','Minimum hőmérséklet',`${d.temp_min} °C`],
             ['bi-thermometer-high','Maximum hőmérséklet',`${d.temp_max} °C`],
@@ -171,7 +172,6 @@ async function showUserWeatherDetail(id) {
             `<i class="bi ${weatherIcon(d.weather_type)} me-2"></i>${escapeHtml(d.location)}`;
         document.querySelector('#detailSubtitle').textContent =
             `${moment(d.date).format('YYYY.MM.DD.')} – ${d.weather_type}`;
-
         document.querySelector('#detailBody').innerHTML = tiles.map(([icon, label, value], i) => `
             <div class="col-6 col-md-4 fade-up" style="--delay: ${i * 0.05}s">
                 <div class="detail-tile h-100">
@@ -180,11 +180,10 @@ async function showUserWeatherDetail(id) {
                 </div>
             </div>
         `).join('');
-
         // panel megjelenítése, az animáció újraindítása és odagörgetés
         const panel = document.querySelector('#userWeatherDetail');
         panel.classList.remove('d-none', 'fade-up');
-        void panel.offsetWidth;   // újraszámoltatjuk a stílust, hogy az animáció újra lefusson
+        void panel.offsetWidth;   //az animáció újra lefutásához kell.
         panel.classList.add('fade-up');
         panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (err) {
