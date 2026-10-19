@@ -62,6 +62,7 @@ function filterGuestWeather() {
     );
     renderGuestWeather(filtered);
 }
+// Eddig guest weather függvények.
 
 // User
 function escapeHtml(value) {
@@ -156,6 +157,7 @@ async function showUserWeatherDetail(id) {
         }
 
         // Iconok és adatok megjelenítése együtt. Felugró panel, animációval.
+        // Egyszerűbb megoldás?
         const tiles = [
             ['bi-thermometer-low','Minimum hőmérséklet',`${d.temp_min} °C`],
             ['bi-thermometer-high','Maximum hőmérséklet',`${d.temp_max} °C`],

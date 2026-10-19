@@ -1,4 +1,4 @@
-// Userek lekérése az admin felületre.
+// Admin felhasználók kezelése
 async function getAllUsers(){
     const luid = loadUser() ? loadUser().ID : 0;
     const usersList = document.querySelector('#usersList');
@@ -27,7 +27,6 @@ async function getAllUsers(){
     }
 }
 
-// Táblázat rajzolás
 function drawUsersTable(users){
     const me = loadUser();
     document.querySelector('#usersCount').textContent = users.length;
@@ -36,12 +35,11 @@ function drawUsersTable(users){
         .join('');
 }
 
-// Users táblázatnak a kirajzolása.
+// Táblázat a userekből.
 function buildUserRow(user, index, me){
     const isActive = user.status != 0;
     const isMe = me && user.ID == me.ID;
 
-    // Szerepkörök hátterének állítása.
     const roleBadge = user.role == 'admin' ? 'text-bg-danger' : 'text-bg-primary';
     const regDate = user.reg ? moment(user.reg).format('YYYY.MM.DD. HH:mm') : '-';
     const lastLogin = user.last ? moment(user.last).format('YYYY.MM.DD. HH:mm') : 'Még nem lépett be';
@@ -70,7 +68,7 @@ function buildUserRow(user, index, me){
     </tr>`;
 }
 
-//Tiltás/feloldás
+// Tiltás/feloldás
 async function changeUserStatus(uid) {
     const me = loadUser();
     const luid = me ? me.ID : 0;
@@ -94,19 +92,19 @@ async function changeUserStatus(uid) {
         console.error(err);
         showMessage('danger', 'ERROR', 'A szerver nem érhető el.');
     }
-
     getAllUsers();
 }
 
-//ADMIN: időjárás-előrejelzések
 
-//Az űrlapmezők azonosítója
+
+// Admin időjárás-előrejelzések
+// Iconok és kiválasztható szűrők.
 const WEATHER_FIELDS = ['date', 'location', 'weather_type', 'temp_min', 'temp_max', 'precipitation',
     'precipitation_probability', 'wind_speed', 'wind_direction', 'humidity', 'pressure', 'uv_index'];
 const WEATHER_NUMERIC_FIELDS = ['temp_min', 'temp_max', 'precipitation', 'precipitation_probability',
     'wind_speed', 'humidity', 'pressure', 'uv_index'];
 
-//A diagramon választható mutatók
+// A diagramon választható mutatók
 const CHART_METRICS = {
     precipitation: { label: 'Csapadék', unit: 'mm' },
     precipitation_probability: { label: 'Csapadék valószínűsége', unit: '%' },
@@ -115,6 +113,7 @@ const CHART_METRICS = {
 
 let adminWeatherData = [];
 let editingWeatherId = null;
+let detailWeatherId = null;
 let adminChart = null;
 
 async function adminRequest(path, method, payload = {}) {
@@ -135,7 +134,6 @@ async function adminRequest(path, method, payload = {}) {
     }
 }
 
-//Űrlap
 function readWeatherForm(prefix) {
     const data = {};
     WEATHER_FIELDS.forEach(field => {
@@ -160,8 +158,6 @@ function fillWeatherForm(prefix, item) {
 }
 
 //Dashboard
-
-//Összesítő kártyák a vezérlőpulton
 async function getStatistics() {
     const [weather, users] = await Promise.all([
         adminRequest('/admin/weather', 'POST'),
@@ -185,7 +181,7 @@ async function getStatistics() {
     document.querySelector('#statUsers').textContent = users.body.length;
 }
 
-//új előrejelzés felvétele
+// új előrejelzés felvétele
 async function createWeather(event) {
     event.preventDefault();
     const form = event.target;
@@ -196,8 +192,6 @@ async function createWeather(event) {
     }
 
     const data = readWeatherForm('nw');
-
-    //Itt is tesztelünk, hogy már a frontenden se lehessen hibás adatot felvinni.
     if (data.temp_min > data.temp_max) {
         showMessage('warning', 'FIGYELEM', 'A minimum hőmérséklet nem lehet nagyobb a maximumnál!');
         return;
@@ -214,9 +208,8 @@ async function createWeather(event) {
     await getStatistics();
 }
 
-//admin időjárás oldal
-
-//Összes előrejelzés lekérése
+//Admin időjárás oldal
+//összes előrejelzés lekérése
 async function getallAdminWeather() {
     const me = loadUser();
     if (!me) {
@@ -230,7 +223,7 @@ async function getallAdminWeather() {
     if (res.status != 200) {
         showMessage('danger', 'ERROR', res.body.error);
         document.querySelector('#adminWeatherBody').innerHTML =
-            '<tr><td colspan="10" class="text-center text-danger">Az adatok nem tölthetők be.</td></tr>';
+            '<tr><td colspan="10" class="text-center text-danger">Rossz az egész.</td></tr>';
         return;
     }
 
@@ -250,7 +243,7 @@ function renderAdminWeather() {
     body.innerHTML = adminWeatherData.map(buildAdminWeatherRow).join('');
 }
 
-//Admin nézeti időjárás oldal.
+// Egy sor az admin táblázatban
 function buildAdminWeatherRow(item, i) {
     const withUnit = (value, unit) => (value === null || value === undefined) ? '-' : `${value} ${unit}`;
 
@@ -272,6 +265,8 @@ function buildAdminWeatherRow(item, i) {
         <td class="d-none d-xl-table-cell text-nowrap">${withUnit(item.pressure, 'hPa')}</td>
         <td class="d-none d-xl-table-cell">${item.uv_index ?? '-'}</td>
         <td class="text-end text-nowrap">
+            <button type="button" class="btn btn-sm btn-outline-secondary" title="Details" aria-label="Details"
+                onclick="showAdminWeatherDetail(${Number(item.ID)})"><i class="bi bi-info-circle"></i><span class="d-none d-xl-inline ms-1">Details</span></button>
             <button type="button" class="btn btn-sm btn-outline-primary" title="Szerkesztés" aria-label="Szerkesztés"
                 onclick="editAdminWeather(${Number(item.ID)})"><i class="bi bi-pencil-square"></i></button>
             <button type="button" class="btn btn-sm btn-outline-danger" title="Törlés" aria-label="Törlés"
@@ -280,11 +275,63 @@ function buildAdminWeatherRow(item, i) {
     </tr>`;
 }
 
-//Szerkesztő panel megjelenítése
+// Egy nap részletes adatai
+function showAdminWeatherDetail(id) {
+    const d = adminWeatherData.find(w => w.ID == id);
+    if (!d) return;
+
+    closeAdminEdit();
+    detailWeatherId = d.ID;
+
+    const tiles = [
+        ['bi-thermometer-low','Minimum hőmérséklet',`${d.temp_min} °C`],
+        ['bi-thermometer-high','Maximum hőmérséklet',`${d.temp_max} °C`],
+        ['bi-cloud-drizzle','Csapadék',`${d.precipitation ?? '-'} mm`],
+        ['bi-droplet-half','Csapadék valószínűsége',`${d.precipitation_probability ?? '-'} %`],
+        ['bi-wind','Szélsebesség',`${d.wind_speed ?? '-'} km/h`],
+        ['bi-compass','Szélirány', d.wind_direction || '-'],
+        ['bi-moisture','Páratartalom',`${d.humidity ?? '-'} %`],
+        ['bi-speedometer2','Légnyomás',`${d.pressure ?? '-'} hPa`],
+        ['bi-sun','UV-index',d.uv_index ?? '-']
+    ];
+
+    document.querySelector('#adminDetailTitle').innerHTML =
+        `<i class="bi ${weatherIcon(d.weather_type)} me-2"></i>${escapeHtml(d.location)}`;
+    document.querySelector('#adminDetailSubtitle').textContent =
+        `${moment(d.date).format('YYYY.MM.DD.')} – ${d.weather_type}`;
+
+    document.querySelector('#adminDetailBody').innerHTML = tiles.map(([icon, label, value], i) => `
+        <div class="col-6 col-md-4 fade-up" style="--delay: ${i * 0.05}s">
+            <div class="detail-tile h-100">
+                <div class="text-body-secondary small"><i class="bi ${icon} me-1"></i>${label}</div>
+                <div class="fs-5 fw-semibold">${escapeHtml(value)}</div>
+            </div>
+        </div>
+    `).join('');
+
+    const panel = document.querySelector('#adminWeatherDetail');
+    panel.classList.remove('d-none', 'fade-up');
+    void panel.offsetWidth;   // animáció újraindításához szükséges szutyok
+    panel.classList.add('fade-up');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeAdminDetail() {
+    detailWeatherId = null;
+    document.querySelector('#adminWeatherDetail').classList.add('d-none');
+}
+
+// A részletes nézetből közvetlenül átváltunk szerkesztésre, ha már nem akarja nézegetni az időjárássssstttt
+function editFromDetail() {
+    if (detailWeatherId !== null) editAdminWeather(detailWeatherId);
+}
+
+// Szerkesztő panel megnyitása
 function editAdminWeather(id) {
     const item = adminWeatherData.find(w => w.ID == id);
     if (!item) return;
 
+    closeAdminDetail(); 
     editingWeatherId = item.ID;
     fillWeatherForm('ed', item);
     document.querySelector('#adminEditTitle').textContent =
@@ -292,7 +339,7 @@ function editAdminWeather(id) {
 
     const panel = document.querySelector('#adminWeatherEdit');
     panel.classList.remove('d-none', 'fade-up');
-    void panel.offsetWidth; // animációnak az újraindítása.
+    void panel.offsetWidth;   // animáció újraindításához cucc itt is
     panel.classList.add('fade-up');
     panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -302,7 +349,7 @@ function closeAdminEdit() {
     document.querySelector('#adminWeatherEdit').classList.add('d-none');
 }
 
-//Modosítás mentése
+// Módosítás az időjárásnál
 async function saveAdminWeather(event) {
     event.preventDefault();
     if (editingWeatherId === null) return;
@@ -324,9 +371,8 @@ async function saveAdminWeather(event) {
     await getallAdminWeather();
 }
 
-//Törlés
+// Törlés
 async function deleteAdminWeather(id) {
-    //Confirm ablak a biztos törléshez.
     if (!confirm('Biztosan törölni szeretnéd ezt az előrejelzést?')) return;
 
     const res = await adminRequest(`/admin/weather/${id}`, 'DELETE');
@@ -337,10 +383,12 @@ async function deleteAdminWeather(id) {
 
     showMessage('success', 'OK', res.body.message);
     if (editingWeatherId == id) closeAdminEdit();
+    if (detailWeatherId == id) closeAdminDetail();
     await getallAdminWeather();
 }
 
-// Chart view frissítése a kiválasztott érték alapján.
+//Diagram
+
 function updateAdminChart() {
     const canvas = document.querySelector('#adminChartCanvas');
     if (!canvas) return;
@@ -353,9 +401,9 @@ function updateAdminChart() {
     const key = document.querySelector('#chartMetric').value;
     const metric = CHART_METRICS[key];
 
-    const dayOf = w => moment(w.date).format('YYYY-MM-DD');
-    const labels = [...new Set(adminWeatherData.map(dayOf))].sort();
-    const locations = [...new Set(adminWeatherData.map(w => w.location))]
+    const dayOf = w => moment(w.date).format('YYYY-MM-DD'); // Napok
+    const labels = [...new Set(adminWeatherData.map(dayOf))].sort(); // Nap szűrés
+    const locations = [...new Set(adminWeatherData.map(w => w.location))] // Hely szűrés
         .sort((a, b) => a.localeCompare(b, 'hu'));
 
     const datasets = locations.map(location => ({
@@ -371,17 +419,23 @@ function updateAdminChart() {
         spanGaps: true
     }));
 
-    //Chart view alkalmazkodása a sötét és a világos módhoz.
-    Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--bs-body-color').trim() || '#666';
+    // a színek az aktuális témából jönnek
+    const css = getComputedStyle(document.documentElement);
+    Chart.defaults.color = css.getPropertyValue('--bs-body-color').trim() || '#666';
+    const gridColor = css.getPropertyValue('--bs-border-color').trim() || 'rgba(0, 0, 0, 0.1)';
 
-    if (adminChart) adminChart.destroy();
+    if (adminChart) adminChart.destroy();   // ugyanarra a canvasra nem lehet két diagramot rajzolni, mert összefolyna az egész
     adminChart = new Chart(canvas, {
         type: 'line',
         data: { labels, datasets },
         options: {
             scales: {
+                x: {
+                    grid: { color: gridColor }
+                },
                 y: {
                     beginAtZero: true,
+                    grid: { color: gridColor },
                     title: { display: true, text: metric.unit }
                 }
             },

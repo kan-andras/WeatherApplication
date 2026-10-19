@@ -81,7 +81,7 @@ function loginCheck() {
     if (user){
         if (user.role == 'admin'){
             setMenuItems('admin');
-            navigate('admin/dashboard');
+            navigate('admin/weather');
         }
         else {
             setMenuItems('user');
