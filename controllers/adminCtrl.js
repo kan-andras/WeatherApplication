@@ -61,7 +61,7 @@ function buildUserRow(user, index, me){
             <div class="form-check form-switch d-inline-block align-middle mb-0">
                 <input class="form-check-input" type="checkbox" role="switch"
                     ${isActive ? 'checked' : ''}
-                    ${isMe ? 'disabled title="A saját fiókodat nem tilthatod le"' : ''}
+                    ${isMe ? 'disabled title="A saját fiókodat ne tiltsd le!"' : ''}
                     onchange="changeUserStatus(${Number(user.ID)})">
             </div>
         </td>
@@ -103,8 +103,7 @@ const WEATHER_FIELDS = ['date', 'location', 'weather_type', 'temp_min', 'temp_ma
     'precipitation_probability', 'wind_speed', 'wind_direction', 'humidity', 'pressure', 'uv_index'];
 const WEATHER_NUMERIC_FIELDS = ['temp_min', 'temp_max', 'precipitation', 'precipitation_probability',
     'wind_speed', 'humidity', 'pressure', 'uv_index'];
-
-// A diagramon választható mutatók
+// A diagramon választható mutatók (Chart view ezt veszi át.)
 const CHART_METRICS = {
     precipitation: { label: 'Csapadék', unit: 'mm' },
     precipitation_probability: { label: 'Csapadék valószínűsége', unit: '%' },
@@ -175,7 +174,6 @@ async function getStatistics() {
 
     const forecasts = document.querySelector('#statForecasts');
     if (!forecasts) return;
-
     forecasts.textContent = weather.body.length;
     document.querySelector('#statLocations').textContent = new Set(weather.body.map(w => w.location)).size;
     document.querySelector('#statUsers').textContent = users.body.length;
@@ -267,7 +265,7 @@ function buildAdminWeatherRow(item, i) {
         <td class="text-end text-nowrap">
             <button type="button" class="btn btn-sm btn-outline-secondary" title="Details" aria-label="Details"
                 onclick="showAdminWeatherDetail(${Number(item.ID)})"><i class="bi bi-info-circle"></i><span class="d-none d-xl-inline ms-1">Details</span></button>
-            <button type="button" class="btn btn-sm btn-outline-primary" title="Szerkesztés" aria-label="Szerkesztés"
+            <button type="button" class="btn btn-sm btn-primary" title="Szerkesztés" aria-label="Szerkesztés"
                 onclick="editAdminWeather(${Number(item.ID)})"><i class="bi bi-pencil-square"></i></button>
             <button type="button" class="btn btn-sm btn-outline-danger" title="Törlés" aria-label="Törlés"
                 onclick="deleteAdminWeather(${Number(item.ID)})"><i class="bi bi-trash"></i></button>
@@ -382,8 +380,12 @@ async function deleteAdminWeather(id) {
     }
 
     showMessage('success', 'OK', res.body.message);
-    if (editingWeatherId == id) closeAdminEdit();
-    if (detailWeatherId == id) closeAdminDetail();
+    if (editingWeatherId == id){
+        closeAdminEdit();
+    }
+    if (detailWeatherId == id) {
+        closeAdminDetail();
+    }
     await getallAdminWeather();
 }
 

@@ -44,7 +44,7 @@ p{
 
 .fade-up {
         --rise: 16px;
-        animation: fadeUp 0.6s ease-out backwards;
+        animation: fadeUp 0.6s ease-out forwards;
         animation-delay: var(--delay, 0s);
     }
 

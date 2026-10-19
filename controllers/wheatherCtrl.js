@@ -53,7 +53,7 @@ function renderGuestWeather(list) {
     `).join('');
 }
 
-
+// Kiválasztott városra szűrés.
 function filterGuestWeather() {
     const term = document.querySelector('#guestWeatherSearch').value.trim().toLowerCase();
     const filtered = guestWeatherData.filter(item =>
